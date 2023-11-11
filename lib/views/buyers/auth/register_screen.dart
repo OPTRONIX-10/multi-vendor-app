@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:multi_vendor_app/controllers/auth_controller.dart';
 import 'package:multi_vendor_app/utils/sncakbar..dart';
 import 'package:multi_vendor_app/views/buyers/auth/login_screen.dart';
@@ -25,25 +26,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isLoading = false;
 
+  dynamic _image;
+
   _signUpUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
       await _authController
-          .signUp(email, password, name, phone)
+          .signUp(email, password, name, phone, _image)
           .whenComplete(() {
         setState(() {
           _isLoading = false;
           _formKey.currentState!.reset();
+          _image = null;
         });
       });
-    } else
+    } else {
       setState(() {
         _isLoading = false;
       });
-    {
       showSncak(context, 'All fields are required');
+    }
+  }
+
+  _selectedGalleryImage() async {
+    final image = await _authController.pickProfileImage(ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _image = image;
+      });
     }
   }
 
@@ -63,13 +75,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                Stack(
-                  children: [
-                    CircleAvatar(
+
+                GestureDetector(
+                  onTap: () => _selectedGalleryImage(),
+                  child: CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.amber,
+                    backgroundImage: _image != null
+                        ? MemoryImage(_image)
+                        : NetworkImage(
+                                'https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg')
+                            as ImageProvider,
                   ),
-                  ],
                 ),
 
                 Padding(

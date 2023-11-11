@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:multi_vendor_app/controllers/auth_controller.dart';
 import 'package:multi_vendor_app/utils/sncakbar..dart';
@@ -22,13 +20,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   late String password;
 
+  bool _isLoading = false;
+
   _loginUser() async {
+    _isLoading = true;
     if (_formKey.currentState!.validate()) {
       String res = await _authController.loginUsers(email, password);
       if (res == 'Success') {
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => MainScreen()));
       } else {
+        setState(() {
+          _isLoading = false;
+        });
         showSncak(context, 'Error Occured');
       }
     }
@@ -75,11 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 _loginUser();
               },
-              child: Text(
-                'Login',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+              child: _isLoading
+                  ? CircularProgressIndicator()
+                  : Text(
+                      'Login',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,
                 fixedSize: Size(MediaQuery.of(context).size.width - 40, 50),
